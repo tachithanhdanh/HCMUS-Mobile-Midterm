@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">midterm</string>
+    <string name="americano">Americano</string>
+    <string name="cappuccino">Cappuccino</string>
+    <string name="mocha">Mocha</string>
+    <string name="flat_white">Flat White</string>
+</resources>
