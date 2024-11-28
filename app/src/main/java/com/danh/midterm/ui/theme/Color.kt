@@ -16,8 +16,16 @@ val Gray = Color(0xFFD8D8D8)
 
 val CoffeeItemCardColor = Color(247,248,251,255)
 
-val White80 = Color(0xFFF7F8FB)
-
 val TextColor = Color(0xFF001833)
 
+val OtherTextColor = Color(0xFF181D2D)
+
+val GrayTextColor = Color(0xFFAAAAAA)
+
+val LightTextColor = TextColor.copy(alpha = 0.5f)
+
 val DividerColor = Color(0xFFF4F5F7)
+
+val DarkBlueLight = Color(0xFFA2CDE9).copy(alpha = 0.3f)
+
+val LogoTextColor = Color(0xFFFFFAF6)

@@ -44,7 +44,6 @@ import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.DividerColor
 import com.danh.midterm.ui.theme.Gray
 import com.danh.midterm.ui.theme.TextColor
-import com.danh.midterm.ui.theme.White80
 
 @Composable
 fun CoffeeDetailScreen(
