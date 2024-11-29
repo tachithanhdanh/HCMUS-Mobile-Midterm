@@ -4,4 +4,13 @@
     <string name="cappuccino">Cappuccino</string>
     <string name="mocha">Mocha</string>
     <string name="flat_white">Flat White</string>
+    <string name="splash_screen">Splash Screen</string>
+    <string name="home_screen">Home Screen</string>
+    <string name="coffee_detail_screen">Coffee Detail Screen</string>
+    <string name="coffee_cart_screen">Coffee Cart Screen</string>
+    <string name="order_success_screen">Order Success Screen</string>
+    <string name="profile_screen">Profile Screen</string>
+    <string name="rewards_screen">Rewards Screen</string>
+    <string name="redeem_rewards_screen">Redeem Rewards Screen</string>
+    <string name="my_orders_screen">My Order Screen</string>
 </resources>
