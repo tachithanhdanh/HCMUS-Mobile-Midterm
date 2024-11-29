@@ -1,55 +1,82 @@
 package com.danh.midterm.ui.screens
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
+import androidx.wear.compose.material.FractionalThreshold
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
 import com.danh.midterm.R
-import com.danh.midterm.model.getCoffeeDrawable
+import com.danh.midterm.mock.MockData
+import com.danh.midterm.model.CartItem
 import com.danh.midterm.ui.theme.CoffeeItemCardColor
 import com.danh.midterm.ui.theme.DarkBlue
+import com.danh.midterm.ui.theme.DeleteBackGroundColor
 import com.danh.midterm.ui.theme.TextColor
+import com.danh.midterm.viewmodel.CartViewModel
+import kotlin.math.roundToInt
 
 @Composable
 fun CoffeeCartScreen(
-    cartItems: List<CartItem>,
-    onCheckout: () -> Unit
+    navController: NavHostController,
+    cartViewModel: CartViewModel = viewModel(),
+    onCheckout: () -> Unit,
+    onBack: () -> Unit = { navController.popBackStack() },
+    onDelete: (Int) -> Unit
 ) {
+    val cartItems = cartViewModel.cartItems
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 24.dp, vertical = 32.dp)
     ) {
         // Header: back button and cart icon
         Row(
@@ -58,7 +85,7 @@ fun CoffeeCartScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* Handle back */ }) {
+            IconButton(onClick = { onBack() }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = "Back"
@@ -79,13 +106,13 @@ fun CoffeeCartScreen(
 //                .padding(horizontal = 24.dp)
         ) {
             items(cartItems) { item ->
-                CoffeeCartItem(
-                    coffeeName = item.coffeeName,
-                    options = item.options,
-                    size = item.size,
-                    price = item.price,
+                SwipeableCoffeeCartItem(
+                    coffeeImage = item.image,
+                    coffeeName = item.name,
+                    options = "${item.shot} | ${item.select} | ${item.size} | ${item.ice}",
+                    totalAmount = item.totalAmount,
                     quantity = item.quantity,
-                    onQuantityChange = { /* Handle quantity change */ }
+                    onDelete = { onDelete(item.id) }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
             }
@@ -104,8 +131,12 @@ fun CoffeeCartScreen(
                 }
                 Row {
                     Text(
-                        text = "$%.2f".format(cartItems.sumOf { it.price }),
-                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.W600, color = TextColor)
+                        text = "$%.2f".format(cartItems.sumOf { it.totalAmount }),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.W600,
+                            color = TextColor
+                        )
                     )
                 }
             }
@@ -139,17 +170,90 @@ fun CoffeeCartScreen(
     }
 }
 
+@OptIn(ExperimentalWearMaterialApi::class)
+@Composable
+fun SwipeableCoffeeCartItem(
+    @DrawableRes coffeeImage: Int,
+    coffeeName: String,
+    options: String,
+    totalAmount: Double,
+    quantity: Int,
+    onDelete: () -> Unit // Callback khi bấm nút xóa
+) {
+    val swipeableState = rememberSwipeableState(initialValue = 0)
+    val maxSwipeDistance = with(LocalDensity.current) { 80.dp.toPx() } // Khoảng cách vuốt tối đa
+    val anchors = mapOf(0f to 0, -maxSwipeDistance to 1) // 0: ban đầu, 1: vuốt để xóa
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .swipeable(
+                state = swipeableState,
+                anchors = anchors,
+                thresholds = { _, _ -> FractionalThreshold(0.3f) }, // Ngưỡng vuốt
+                orientation = Orientation.Horizontal
+            )
+    ) {
+        // Kiểm tra nếu vuốt thành công (swipeableState.currentValue == 1)
+        // Nút xóa phía sau
+        Column(
+            modifier = Modifier
+                .clickable {
+                    if (swipeableState.currentValue == 1) {
+                        onDelete()
+                    }
+                } // Bấm nút xóa
+                .fillMaxWidth(0.2f)
+                .height(80.dp)
+                .align(Alignment.CenterEnd)
+                .shadow(
+                    elevation = 2.dp,
+                    shape = RoundedCornerShape(12.dp)
+                ) // Add shadow for elevation
+                .background(color = DeleteBackGroundColor)
+                .clip(RoundedCornerShape(12.dp))
+                .padding(12.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_delete),
+                contentDescription = "Delete",
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(24.dp)
+            )
+        }
+        // Nội dung chính (CoffeeCartItem)
+        CoffeeCartItem(
+            coffeeImage = coffeeImage,
+            coffeeName = coffeeName,
+            options = options,
+            totalAmount = totalAmount,
+            quantity = quantity,
+            modifier = Modifier
+                .offset {
+                    IntOffset(
+                        swipeableState.offset.value.roundToInt(),
+                        0
+                    )
+                } // Dịch chuyển theo vuốt
+        )
+    }
+}
+
+
 @Composable
 fun CoffeeCartItem(
-    coffeeName: Int,
+    @DrawableRes coffeeImage: Int,
+    coffeeName: String,
     options: String,
-    size: Int,
-    price: Double,
+    totalAmount: Double,
     quantity: Int,
-    onQuantityChange: (Int) -> Unit
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .shadow(
                 elevation = 2.dp,
@@ -157,20 +261,20 @@ fun CoffeeCartItem(
             ) // Add shadow for elevation
             .background(color = CoffeeItemCardColor)
             .clip(RoundedCornerShape(12.dp))
-            .padding(16.dp),
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column { // Image
             Box(
                 modifier = Modifier
-                    .width(80.dp)
-                    .height(80.dp)
+                    .width(60.dp)
+                    .height(60.dp)
                     .clip(RoundedCornerShape(12.dp))
             ) {
                 // Image
                 Image(
-                    painter = painterResource(id = getCoffeeDrawable(coffeeName)),
+                    painter = painterResource(id = coffeeImage),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
@@ -179,7 +283,7 @@ fun CoffeeCartItem(
         // Coffee name and size
         Column {
             Text(
-                text = stringResource(coffeeName),
+                text = coffeeName,
                 style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -189,7 +293,7 @@ fun CoffeeCartItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "x $size",
+                text = "x $quantity",
                 style = TextStyle(
                     fontSize = 16.sp,
                     color = Color.Black.copy(alpha = 0.5f),
@@ -199,60 +303,28 @@ fun CoffeeCartItem(
         }
 
         // Quantity and price
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Center
         ) {
-//            IconButton(
-//                onClick = { onQuantityChange(quantity - 1) },
-//                enabled = quantity > 1
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Delete,
-//                    contentDescription = "Decrease quantity"
-//                )
-//            }
-//            Text(
-//                text = quantity.toString(),
-//                modifier = Modifier.padding(horizontal = 8.dp),
-//                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
-//            )
-//            IconButton(
-//                onClick = { onQuantityChange(quantity + 1) }
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Add,
-//                    contentDescription = "Increase quantity"
-//                )
-//            }
-//            Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "$%.2f".format(price),
+                text = "$%.2f".format(totalAmount),
                 style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
             )
         }
     }
 }
 
-data class CartItem(
-    val coffeeName: Int,
-    val options: String,
-    val size: Int,
-    val price: Double,
-    val quantity: Int = 1
-)
-
 @Preview(showBackground = true)
 @Composable
 fun CoffeeCartScreenPreview() {
-    val cartItems = listOf(
-        CartItem(R.string.americano, "single | iced | medium | full ice", 3, 1.0, 5),
-        CartItem(R.string.cappuccino, "single | iced | medium | full ice", 3, 3.0, 7),
-        CartItem(R.string.flat_white, "single | iced | medium | full ice", 3, 5.0, 9)
-    )
-
+    val cartItems = MockData.cartItems
+    val navController = rememberNavController()
     CoffeeCartScreen(
-        cartItems = cartItems,
-        onCheckout = { /* Handle checkout action */ }
+        navController = navController,
+        cartViewModel = CartViewModel(),
+        onCheckout = { /* Handle checkout action */ },
+        onDelete = { /* Handle delete action */ }
     )
 }
 

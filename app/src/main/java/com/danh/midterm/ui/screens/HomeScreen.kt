@@ -1,5 +1,6 @@
 package com.example.ordercoffee.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,29 +22,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
-import com.danh.midterm.ui.components.CoffeeOption
 import com.danh.midterm.ui.components.CoffeeOrderingUI
 import com.danh.midterm.ui.components.LoyaltyCard
+import com.danh.midterm.ui.theme.TextColor
+import com.danh.midterm.viewmodel.CoffeeViewModel
 
 
 @Composable
 fun HomeScreen(
-    onCoffeeSelected: (String) -> Unit,
+    navController: NavHostController,
+    homeViewModel: CoffeeViewModel = viewModel(),
+    onCoffeeSelected: (Int) -> Unit,
     onCartClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    fullName: String = "Danh",
 ) {
+    // Thu thập dữ liệu từ StateFlow
+    val coffeeList = homeViewModel.coffeeList
+
     // Entire Home Screen is wrapped in a Scaffold
     Scaffold(
-        bottomBar = {
-//            BottomNavigationBar()
-        }
     ) { padding ->
         // The column wraps all content in the Home Screen
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
+                .background(color = Color.White)
         ) {
             Row {
                 Column(
@@ -65,8 +74,11 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
                             )
                             Text(
-                                text = "Anderson",
-                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                                text = fullName,
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextColor
+                                )
                             )
                         }
                         Row {
@@ -105,14 +117,8 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 CoffeeOrderingUI(
-                    coffeeOptions = listOf(
-                        CoffeeOption("Americano", R.drawable.img_americano),
-                        CoffeeOption("Cappuccino", R.drawable.img_cappuccino),
-                        CoffeeOption("Mocha", R.drawable.img_mocha),
-                        CoffeeOption("Flat White", R.drawable.img_flat_white)
-                    ),
-                    loyaltyCardProgress = 4,
-                    onCoffeeSelected = {}
+                    coffeeList = coffeeList,
+                    onCoffeeSelected = { onCoffeeSelected(it) }
                 )
             }
         }
@@ -125,9 +131,11 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
+    val navController = rememberNavController()
     HomeScreen(
+        navController = navController,
         onCoffeeSelected = {},
         onCartClick = {},
-        onProfileClick = {}
+        onProfileClick = {},
     )
 }

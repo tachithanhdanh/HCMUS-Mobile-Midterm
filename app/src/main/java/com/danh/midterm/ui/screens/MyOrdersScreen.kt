@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.DarkBlueLight
@@ -41,7 +43,8 @@ import com.danh.midterm.ui.theme.TextColor
 import com.example.ordercoffee.ui.components.BottomNavigationBar
 
 @Composable
-fun MyOrderScreen(
+fun MyOrdersScreen(
+    navController: NavHostController,
     orders: List<Order>,
     isHistory: Boolean,
     onRedeemReward: (Order) -> Unit
@@ -72,9 +75,9 @@ fun MyOrderScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (isHistory) {
-            MyHistoryOrderScreen(orders)
+            MyHistoryOrdersScreen(orders)
         } else {
-            MyOngoingOrderScreen(orders)
+            MyOngoingOrdersScreen(orders)
         }
 
         Row(
@@ -109,7 +112,7 @@ fun MyOrderScreen(
 }
 
 @Composable
-fun MyOngoingOrderScreen(
+fun MyOngoingOrdersScreen(
     orders: List<Order>,
 ) {
     Row(
@@ -171,7 +174,7 @@ fun MyOngoingOrderScreen(
 }
 
 @Composable
-fun MyHistoryOrderScreen(
+fun MyHistoryOrdersScreen(
     orders: List<Order>,
 ) {
     Row(
@@ -329,8 +332,9 @@ data class Order(
 
 @Preview(showBackground = true)
 @Composable
-fun OrderItemPreview() {
-    MyOrderScreen(
+fun MyOrderScreenPreview() {
+    MyOrdersScreen(
+        navController = rememberNavController(),
         orders = listOf(
             Order(
                 "24 June | 12:30 PM",

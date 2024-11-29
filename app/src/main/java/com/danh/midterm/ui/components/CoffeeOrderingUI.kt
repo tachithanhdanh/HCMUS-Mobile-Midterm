@@ -29,17 +29,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.danh.midterm.R
+import com.danh.midterm.mock.MockData
+import com.danh.midterm.model.Coffee
 import com.danh.midterm.ui.theme.CoffeeItemCardColor
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.Gray
+import com.danh.midterm.ui.theme.TextColor
 import com.example.ordercoffee.ui.components.BottomNavigationBar
 
 @Composable
 fun CoffeeOrderingUI(
-    coffeeOptions: List<CoffeeOption>,
-    loyaltyCardProgress: Int,
-    onCoffeeSelected: (CoffeeOption) -> Unit
+    coffeeList: List<Coffee>,
+    onCoffeeSelected: (Int) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -51,6 +52,7 @@ fun CoffeeOrderingUI(
         colors = CardDefaults.cardColors(containerColor = DarkBlue),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp) // Thay đổi độ cao bóng,
     ) {
+
         // Wrap toàn bộ nội dung trong Column để áp dụng padding chung
         Column(
             modifier = Modifier
@@ -73,10 +75,13 @@ fun CoffeeOrderingUI(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(coffeeOptions) { option ->
+
+                items(coffeeList) { option ->
                     CoffeeOptionCard(
                         option = option,
-                        onClick = { onCoffeeSelected(option) }
+                        onClick = {
+                            onCoffeeSelected(option.id)
+                        }
                     )
                 }
             }
@@ -86,29 +91,8 @@ fun CoffeeOrderingUI(
 }
 
 @Composable
-private fun CoffeeOptionsGrid(
-    coffeeOptions: List<CoffeeOption>,
-    onCoffeeSelected: (CoffeeOption) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(coffeeOptions) { option ->
-            CoffeeOptionCard(
-                option = option,
-                onClick = { onCoffeeSelected(option) }
-            )
-        }
-    }
-}
-
-@Composable
 private fun CoffeeOptionCard(
-    option: CoffeeOption,
+    option: Coffee,
     onClick: () -> Unit
 ) {
     Card(
@@ -137,29 +121,19 @@ private fun CoffeeOptionCard(
                 style = TextStyle(
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.W500
+                    fontWeight = FontWeight.W500,
+                    color = TextColor
                 )
             )
         }
     }
 }
 
-data class CoffeeOption(
-    val name: String,
-    val imageResource: Int
-)
-
 @Preview(showBackground = true)
 @Composable
 fun CoffeeOrderingUIPreview() {
     CoffeeOrderingUI(
-        coffeeOptions = listOf(
-            CoffeeOption("Americano", R.drawable.img_americano),
-            CoffeeOption("Cappuccino", R.drawable.img_cappuccino),
-            CoffeeOption("Mocha", R.drawable.img_mocha),
-            CoffeeOption("Flat White", R.drawable.img_flat_white)
-        ),
-        loyaltyCardProgress = 4,
+        coffeeList = MockData.coffeeList,
         onCoffeeSelected = {}
     )
 }

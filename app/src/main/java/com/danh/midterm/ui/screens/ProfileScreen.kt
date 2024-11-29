@@ -14,10 +14,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,69 +38,86 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
+import com.danh.midterm.mock.MockData
+import com.danh.midterm.model.Profile
 import com.danh.midterm.ui.theme.CoffeeItemCardColor
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.LightTextColor
 import com.danh.midterm.ui.theme.TextColor
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    navController: NavHostController,
+    profile: Profile
+) {
     Column(
-        modifier = Modifier.padding(30.dp).fillMaxHeight(),
+        modifier = Modifier.background(color = Color.White).padding(horizontal = 30.dp, vertical = 48.dp).fillMaxHeight(),
     ) {
-        Row(
+        Row (
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_back),
+                    contentDescription = "Back"
+                )
+            }
+            Spacer(modifier = Modifier.weight(0.8f))
             Text(
                 text = "Profile",
-                style = TextStyle.Default.copy(
-                    textAlign = TextAlign.Center,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextColor
-                ),
-                modifier = Modifier.padding(bottom = 16.dp)
+                textAlign = TextAlign.Center,
+                style = TextStyle(
+                    color = TextColor,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
             )
+            Spacer(modifier = Modifier.weight(1f))
         }
-
 
         ProfileItem(
             icon = R.drawable.ic_profile,
             label = "Full name",
-            value = "Anderson",
-            onEditClick = { /* Handle edit click */ }
+            initialValue = profile.fullName,
+            onValueChange = { profile.fullName = it }
         )
         ProfileItem(
             icon = R.drawable.ic_phone,
             label = "Phone number",
-            value = "+60134589525",
-            onEditClick = { /* Handle edit click */ }
+            initialValue = profile.phoneNumber,
+            onValueChange = { profile.phoneNumber = it }
         )
         ProfileItem(
             icon = R.drawable.ic_message,
             label = "Email",
-            value = "Anderson@email.com",
-            onEditClick = { /* Handle edit click */ }
+            initialValue = profile.email,
+            onValueChange = { profile.email = it }
         )
         ProfileItem(
             icon = R.drawable.ic_location,
-            label = "Phone number",
-            value = "3 Addersion Court\n" +
-                    "Chino Hills, HO56824, United State",
-            onEditClick = { /* Handle edit click */ }
+            label = "Address",
+            initialValue = profile.address,
+            onValueChange = { profile.address = it }
         )
     }
+
 }
 
 @Composable
 fun ProfileItem(
     @DrawableRes icon: Int,
     label: String,
-    value: String,
-    onEditClick: () -> Unit
+    initialValue: String,
+    onValueChange: (String) -> Unit
 ) {
+    // Trạng thái để kiểm soát chế độ chỉnh sửa
+    var isEditing by remember { mutableStateOf(false) }
+    var textValue by remember { mutableStateOf(initialValue) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,27 +126,22 @@ fun ProfileItem(
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp) // Kích thước tổng thể của icon
-                .background(
-                    color = CoffeeItemCardColor, // Màu nền
-                    shape = CircleShape // Bo góc tròn
-                )
-                .border(
-                    width = 2.dp, // Độ dày viền
-                    color = Color.Transparent, // Màu viền
-                    shape = CircleShape // Bo góc viền tròn
-                ),
-            contentAlignment = Alignment.Center // Căn chỉnh icon vào giữa
+                .size(48.dp)
+                .background(color = CoffeeItemCardColor, shape = CircleShape)
+                .border(width = 2.dp, color = Color.Transparent, shape = CircleShape),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = icon), // Thay bằng tài nguyên icon của bạn
+                painter = painterResource(id = icon),
                 contentDescription = label,
-                tint = Color.Unspecified, // Màu của icon
-                modifier = Modifier.size(20.dp) // Kích thước icon bên trong
+                tint = Color.Unspecified,
+                modifier = Modifier.size(20.dp)
             )
         }
 
         Spacer(modifier = Modifier.width(16.dp))
+
+        // Hiển thị nội dung: Text hoặc TextField
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
@@ -132,8 +154,67 @@ fun ProfileItem(
                     fontWeight = FontWeight.Medium
                 )
             )
+            if (isEditing) {
+                // Hiển thị modal (Dialog) để chỉnh sửa thông tin
+                AlertDialog(
+                    onDismissRequest = { isEditing = false }, // Đóng modal khi click ra ngoài
+                    title = { Text(text = "Edit $label") },
+                    text = {
+                        TextField(
+                            value = textValue,
+                            onValueChange = { newText ->
+                                textValue = newText
+                            },
+                            label = { Text("Enter new value", color = DarkBlue) },
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = TextStyle(
+                                color = DarkBlue,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W600
+                            ),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedIndicatorColor = DarkBlue,
+                                unfocusedIndicatorColor = DarkBlue,
+                            )
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                onValueChange(textValue) // Lưu giá trị mới
+                                isEditing = false // Đóng modal và trở lại chế độ xem
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = DarkBlue,
+                                containerColor = Color.Transparent
+                            )
+                        ) {
+                            Text("Save")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                isEditing = false // Đóng modal mà không lưu
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = DarkBlue,
+                                containerColor = Color.Transparent
+                            )
+                        ) {
+                            Text("Cancel")
+                        }
+                    },
+                    containerColor = Color.White,
+                    textContentColor = DarkBlue,
+                    titleContentColor = DarkBlue,
+                    iconContentColor = DarkBlue
+                )
+            }
             Text(
-                text = value,
+                text = textValue,
                 style = TextStyle.Default.copy(
                     color = DarkBlue,
                     fontSize = 14.sp,
@@ -141,14 +222,20 @@ fun ProfileItem(
                 )
             )
         }
-        IconButton(onClick = onEditClick) {
-            Icon(painterResource(id = R.drawable.ic_edit), contentDescription = "Edit")
+
+        IconButton(onClick = { isEditing = !isEditing }) {
+            Icon(
+                painterResource(id = R.drawable.ic_edit),
+                contentDescription = if (isEditing) "Save" else "Edit"
+            )
         }
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen()
+    val navHostController = rememberNavController()
+    ProfileScreen(navHostController, MockData.CurrentProfile)
 }

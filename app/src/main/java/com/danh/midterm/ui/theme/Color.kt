@@ -29,3 +29,5 @@ val DividerColor = Color(0xFFF4F5F7)
 val DarkBlueLight = Color(0xFFA2CDE9).copy(alpha = 0.3f)
 
 val LogoTextColor = Color(0xFFFFFAF6)
+
+val DeleteBackGroundColor = Color(0xFFFFE5E5)
