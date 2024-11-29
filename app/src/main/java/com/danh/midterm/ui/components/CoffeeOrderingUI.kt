@@ -29,8 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.mock.MockData
 import com.danh.midterm.model.Coffee
+import com.danh.midterm.navigation.Screen
 import com.danh.midterm.ui.theme.CoffeeItemCardColor
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.Gray
@@ -39,6 +42,7 @@ import com.example.ordercoffee.ui.components.BottomNavigationBar
 
 @Composable
 fun CoffeeOrderingUI(
+    navController: NavHostController,
     coffeeList: List<Coffee>,
     onCoffeeSelected: (Int) -> Unit
 ) {
@@ -85,7 +89,7 @@ fun CoffeeOrderingUI(
                     )
                 }
             }
-            BottomNavigationBar()
+            BottomNavigationBar(navController = navController)
         }
     }
 }
@@ -133,6 +137,7 @@ private fun CoffeeOptionCard(
 @Composable
 fun CoffeeOrderingUIPreview() {
     CoffeeOrderingUI(
+        navController = rememberNavController(),
         coffeeList = MockData.coffeeList,
         onCoffeeSelected = {}
     )

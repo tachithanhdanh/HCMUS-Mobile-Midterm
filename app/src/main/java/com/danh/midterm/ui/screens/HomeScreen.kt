@@ -117,6 +117,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 CoffeeOrderingUI(
+                    navController = navController,
                     coffeeList = coffeeList,
                     onCoffeeSelected = { onCoffeeSelected(it) }
                 )

@@ -4,8 +4,10 @@ import com.danh.midterm.R
 import com.danh.midterm.model.CartItem
 import com.danh.midterm.model.Coffee
 import com.danh.midterm.model.CoffeeRedeem
+import com.danh.midterm.model.Order
 import com.danh.midterm.model.Profile
 import java.time.LocalDate
+import java.util.Date
 
 object MockData {
     val coffeeList = listOf(
@@ -22,7 +24,7 @@ object MockData {
         CoffeeRedeem(4, 4, LocalDate.of(2024, 12, 25), 215, R.drawable.img_flat_white)
     )
 
-    val CurrentProfile = Profile(
+    val profile = Profile(
         "Danh",
         "0123456789",
         "tachithanhdanh@gmail.com",
@@ -62,6 +64,44 @@ object MockData {
             "full ice",
             3,
             60.0
+        ),
+    )
+
+    val orders = listOf(
+        Order(
+            Date(),
+            20.0,
+            "Americano",
+            "3 Addreson Court United State",
+            false
+        ),
+        Order(
+            Date(),
+            40.0,
+            "Cappuccino",
+            "3 Addreson Court United State",
+            false
+        ),
+        Order(
+            Date(),
+            60.0,
+            "Mocha",
+            "3 Addreson Court United State",
+            false
+        ),
+        Order(
+            Date(),
+            80.0,
+            "Flat White",
+            "3 Addreson Court United State",
+            true
+        ),
+        Order(
+            Date(),
+            100.0,
+            "Americano",
+            "3 Addreson Court United State",
+            true
         ),
     )
 }

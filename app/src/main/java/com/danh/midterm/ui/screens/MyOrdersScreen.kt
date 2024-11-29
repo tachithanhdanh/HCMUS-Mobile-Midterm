@@ -2,6 +2,7 @@ package com.danh.midterm.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,13 +13,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,221 +39,169 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
+import com.danh.midterm.model.Order
+import com.danh.midterm.navigation.Screen
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.DarkBlueLight
 import com.danh.midterm.ui.theme.DividerColor
 import com.danh.midterm.ui.theme.Gray
 import com.danh.midterm.ui.theme.TextColor
+import com.danh.midterm.viewmodel.OrderViewModel
 import com.example.ordercoffee.ui.components.BottomNavigationBar
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun MyOrdersScreen(
     navController: NavHostController,
-    orders: List<Order>,
-    isHistory: Boolean,
-    onRedeemReward: (Order) -> Unit
+    orderViewModel: OrderViewModel = viewModel(),
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 32.dp),
-    ) {
+    var isHistory by remember { mutableStateOf(false) }
+    val orders = orderViewModel.orders
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+    val disabledTextStyle = TextStyle(
+        fontSize = 16.sp,
+        color = Gray,
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.W500
+    )
+    val enabledTextStyle = TextStyle(
+        fontSize = 16.sp,
+        color = TextColor,
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.W500
+    )
+
+    val scrollState = rememberScrollState()
+    Box (modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 32.dp)
+                .verticalScroll(scrollState),
         ) {
 
-            Text(
-                text = "My Orders", style = TextStyle(
-                    fontSize = 16.sp,
-                    color = TextColor,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.W500
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                Text(
+                    text = "My Orders", style = TextStyle(
+                        fontSize = 16.sp,
+                        color = TextColor,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.W500
+                    )
                 )
+
+
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(16.dp)
+                        .clickable { isHistory = false },
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "On going", style = if (!isHistory) enabledTextStyle else disabledTextStyle
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        color = if (!isHistory) DarkBlue else DividerColor,
+//                    modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(16.dp)
+                        .clickable { isHistory = true },
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "History", style = if (isHistory) enabledTextStyle else disabledTextStyle
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        color = if (isHistory) DarkBlue else DividerColor,
+//                    modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                }
+            }
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = DividerColor, // Màu nhạt
+                modifier = Modifier.fillMaxWidth()
             )
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    orders.filter { it.complete == isHistory }.forEach { order ->
+                        OrderItem(
+                            order = order
+                        )
+                    }
 
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (isHistory) {
-            MyHistoryOrdersScreen(orders)
-        } else {
-            MyOngoingOrdersScreen(orders)
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                orders.forEach { order ->
-                    OrderItem(
-                        order = order, onRedeemReward = onRedeemReward, disabled = isHistory
-                    )
                 }
 
             }
-
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        Box(
-            modifier = Modifier
-                .padding(16.dp)
-                .clip(RoundedCornerShape(16.dp)) // Bo góc cho NavigationBar
-                .shadow(
-                    elevation = 12.dp, shape = RoundedCornerShape(16.dp)
-                ) // Thêm hiệu ứng đổ bóng
-        ) {
-            BottomNavigationBar()
-        }
-    }
-}
-
-@Composable
-fun MyOngoingOrdersScreen(
-    orders: List<Order>,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "On going", style = TextStyle(
-                    fontSize = 16.sp,
-                    color = TextColor,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.W500
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = DarkBlue,
-//                    modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "History", style = TextStyle(
-                    fontSize = 16.sp,
-                    color = Gray,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.W500
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = DividerColor,
-//                    modifier = Modifier.padding(vertical = 8.dp)
-            )
-
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp)) // Bo góc cho NavigationBar
+                    .shadow(
+                        elevation = 12.dp, shape = RoundedCornerShape(16.dp)
+                    ) // Thêm hiệu ứng đổ bóng
+            ) {
+                BottomNavigationBar(navController = navController)
+            }
         }
     }
-    HorizontalDivider(
-        thickness = 2.dp,
-        color = DividerColor, // Màu nhạt
-        modifier = Modifier.fillMaxWidth()
-    )
-}
 
-@Composable
-fun MyHistoryOrdersScreen(
-    orders: List<Order>,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "On going", style = TextStyle(
-                    fontSize = 16.sp,
-                    color = Gray,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.W500
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = DividerColor,
-//                    modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "History", style = TextStyle(
-                    fontSize = 16.sp,
-                    color = TextColor,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.W500
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
 
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = DarkBlue,
-//                    modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-        }
-    }
-    HorizontalDivider(
-        thickness = 2.dp,
-        color = DividerColor, // Màu nhạt
-        modifier = Modifier.fillMaxWidth()
-    )
 }
 
 @Composable
 fun OrderItem(
     order: Order,
-    onRedeemReward: (Order) -> Unit,
-    disabled: Boolean = false // Thêm biến trạng thái `disabled`
 ) {
+    // Define the format
+    val formatter = SimpleDateFormat("dd MMMM yyyy | HH:mm", Locale.getDefault())
+
+    // Convert the date to the desired format
+    val formattedDate = formatter.format(order.date)
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = !disabled) { onRedeemReward(order) } // Disable click nếu `disabled = true`
-            .graphicsLayer(alpha = if (disabled) 0.5f else 1f), // Điều chỉnh độ mờ
+            .clickable(enabled = !order.complete) { order.complete = true } // Disable click nếu `disabled = true`
+            .graphicsLayer(alpha = if (order.complete) 0.5f else 1f), // Điều chỉnh độ mờ
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent,
             contentColor = Color.Black
@@ -260,8 +215,8 @@ fun OrderItem(
             ) {
                 Column {
                     Text(
-                        text = order.date, style = TextStyle(
-                            color = DarkBlueLight,
+                        text = formattedDate, style = TextStyle(
+                            color = DarkBlue,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.W500
                         )
@@ -269,7 +224,7 @@ fun OrderItem(
                 }
                 Column {
                     Text(
-                        text = "$${order.price}", style = TextStyle(
+                        text = "$${order.totalAmount}", style = TextStyle(
                             color = DarkBlue,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.W500
@@ -289,7 +244,7 @@ fun OrderItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = order.item, style = TextStyle(
+                    text = order.name, style = TextStyle(
                         color = DarkBlue,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W500
@@ -307,7 +262,7 @@ fun OrderItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = order.location, style = TextStyle(
+                    text = order.address, style = TextStyle(
                         color = DarkBlue,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.W500
@@ -323,38 +278,11 @@ fun OrderItem(
     }
 }
 
-data class Order(
-    val date: String,
-    val item: String,
-    val location: String,
-    val price: Double
-)
-
 @Preview(showBackground = true)
 @Composable
 fun MyOrderScreenPreview() {
     MyOrdersScreen(
         navController = rememberNavController(),
-        orders = listOf(
-            Order(
-                "24 June | 12:30 PM",
-                "Americano",
-                "3 Addersion Court Chino Hills, HO56824, United State",
-                5.99
-            ),
-            Order(
-                "24 June | 12:30 PM",
-                "Cafe Latte",
-                "3 Addersion Court Chino Hills, HO56824, United State",
-                3.99
-            ),
-            Order(
-                "24 June | 12:30 PM",
-                "Flat White",
-                "3 Addersion Court Chino Hills, HO56824, United State",
-                4.99
-            )
-        ),
-        isHistory = true
-    ) { }
+        orderViewModel = OrderViewModel()
+    )
 }

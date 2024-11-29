@@ -35,12 +35,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.TextColor
 
 @Composable
 fun RedeemRewardsScreen(
+    navController: NavHostController,
     rewards: List<Reward>,
     onRedeemReward: (Reward) -> Unit
 ) {
@@ -154,6 +157,7 @@ data class Reward(
 @Composable
 fun RewardItemPreview() {
     RedeemRewardsScreen(
+        navController = rememberNavController(),
         rewards = listOf(
             Reward("Americano", 1340, "04.07.21", R.drawable.img_americano),
             Reward("Flat White", 1340, "04.07.2021", R.drawable.img_flat_white),

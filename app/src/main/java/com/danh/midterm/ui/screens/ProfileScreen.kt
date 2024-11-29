@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -38,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
@@ -47,12 +47,14 @@ import com.danh.midterm.ui.theme.CoffeeItemCardColor
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.LightTextColor
 import com.danh.midterm.ui.theme.TextColor
+import com.danh.midterm.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
     navController: NavHostController,
-    profile: Profile
+    profileViewModel: ProfileViewModel = viewModel(),
 ) {
+    val profile = profileViewModel.profile
     Column(
         modifier = Modifier.background(color = Color.White).padding(horizontal = 30.dp, vertical = 48.dp).fillMaxHeight(),
     ) {
@@ -82,8 +84,8 @@ fun ProfileScreen(
         ProfileItem(
             icon = R.drawable.ic_profile,
             label = "Full name",
-            initialValue = profile.fullName,
-            onValueChange = { profile.fullName = it }
+            initialValue = profile.name,
+            onValueChange = { profile.name = it }
         )
         ProfileItem(
             icon = R.drawable.ic_phone,
@@ -184,6 +186,7 @@ fun ProfileItem(
                         TextButton(
                             onClick = {
                                 onValueChange(textValue) // Lưu giá trị mới
+
                                 isEditing = false // Đóng modal và trở lại chế độ xem
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -237,5 +240,5 @@ fun ProfileItem(
 @Composable
 fun ProfileScreenPreview() {
     val navHostController = rememberNavController()
-    ProfileScreen(navHostController, MockData.CurrentProfile)
+    ProfileScreen(navHostController)
 }

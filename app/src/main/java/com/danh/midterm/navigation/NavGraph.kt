@@ -1,6 +1,7 @@
 // midterm/navigation/NavGraph.kt
 package com.danh.midterm.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.danh.midterm.R
 import com.danh.midterm.mock.MockData
+import com.danh.midterm.model.Order
 import com.danh.midterm.navigation.Screen.CoffeeDetail
 import com.danh.midterm.navigation.Screen.Home
 import com.danh.midterm.navigation.Screen.Splash
@@ -20,15 +22,21 @@ import com.danh.midterm.ui.screens.CoffeeDetailScreen
 import com.danh.midterm.ui.screens.MyOrdersScreen
 import com.danh.midterm.ui.screens.OrderSuccessScreen
 import com.danh.midterm.ui.screens.ProfileScreen
+import com.danh.midterm.ui.screens.RedeemRewardsScreen
+import com.danh.midterm.ui.screens.RewardsScreen
 import com.danh.midterm.ui.screens.SplashScreen
 import com.danh.midterm.viewmodel.CartViewModel
+import com.danh.midterm.viewmodel.OrderViewModel
+import com.danh.midterm.viewmodel.ProfileViewModel
 import com.example.ordercoffee.ui.screens.HomeScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
-    var currentProfile by remember { mutableStateOf(MockData.CurrentProfile) }
     val cartViewModel: CartViewModel = viewModel() // Lấy
     val cartItems = cartViewModel.cartItems
+    val orderViewModel: OrderViewModel = viewModel()
+    val profileViewModel: ProfileViewModel = viewModel()
+    val currentProfile = profileViewModel.profile
     NavHost(navController = navController, startDestination = Splash.route) {
         composable(Splash.route) {
             SplashScreen(
@@ -45,7 +53,7 @@ fun NavGraph(navController: NavHostController) {
                 },
                 onCartClick = { navController.navigate(Screen.CoffeeCart.route) },
                 onProfileClick = { navController.navigate(Screen.Profile.route) },
-                fullName = currentProfile.fullName
+                fullName = currentProfile.name
             )
         }
         composable(CoffeeDetail.route + "/{coffeeId}") { backStackEntry ->
@@ -60,7 +68,16 @@ fun NavGraph(navController: NavHostController) {
             CoffeeCartScreen(
                 navController = navController,
                 cartViewModel = cartViewModel,
-                onCheckout = { navController.navigate(Screen.OrderSuccess.route) },
+                onCheckout = {
+                    cartItems.forEach() {
+                        orderViewModel.createOrder(it, currentProfile)
+                    }
+                    cartViewModel.clearCart()
+                    for (order in orderViewModel.orders) {
+                        Log.d("Order", order.toString())
+                    }
+                    navController.navigate(Screen.OrderSuccess.route)
+                             },
                 onBack = { navController.popBackStack() },
                 onDelete = { id ->
                     cartViewModel.removeItemById(id)
@@ -70,16 +87,16 @@ fun NavGraph(navController: NavHostController) {
             OrderSuccessScreen(navController = navController)
         }
         composable(Screen.Profile.route) {
-            ProfileScreen(navController = navController, profile = currentProfile)
+            ProfileScreen(navController = navController)
         }
-//        composable(Rewards.route) {
-//            RewardsScreen(navController = navController)
-//        }
-//        composable(RedeemRewards.route) {
-//            RedeemRewardsScreen(navController = navController)
+        composable(Screen.Rewards.route) {
+            RewardsScreen(navController = navController)
+        }
+//        composable(Screen.RedeemRewards.route) {
+//            RedeemRewardsScreen(navController = navController, rewards = MockData.CoffeeRedeemList)
 //        }
         composable(Screen.MyOrders.route) {
-            MyOrdersScreen(navController = navController)
+            MyOrdersScreen(navController = navController, orderViewModel = orderViewModel)
         }
     }
 }

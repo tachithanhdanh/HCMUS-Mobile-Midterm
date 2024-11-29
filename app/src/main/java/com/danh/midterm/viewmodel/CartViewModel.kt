@@ -27,6 +27,10 @@ class CartViewModel : ViewModel() {
         cartItems = newItems
     }
 
+    fun clearCart() {
+        cartItems = emptyList()
+    }
+
     fun getNewId(): Int {
         // Get id max + 1
         return cartItems.maxByOrNull { it.id }?.id?.plus(1) ?: 1

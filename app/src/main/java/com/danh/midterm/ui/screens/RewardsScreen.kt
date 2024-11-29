@@ -23,6 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.danh.midterm.navigation.Screen
 import com.danh.midterm.ui.components.LoyaltyCard
 import com.danh.midterm.ui.components.PointCard
 import com.danh.midterm.ui.theme.DarkBlue
@@ -32,12 +35,12 @@ import com.example.ordercoffee.ui.components.BottomNavigationBar
 
 @Composable
 fun RewardsScreen(
-    // Các tham số truyền vào: danh sách lịch sử giao dịch, số lượng điểm thưởng hiện tại, ...
+    navController: NavHostController
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(horizontal = 24.dp, vertical = 48.dp)
     ) {
         LoyaltyCard(
             currentStamps = 4,
@@ -87,7 +90,7 @@ fun RewardsScreen(
                 .clip(RoundedCornerShape(16.dp)) // Bo góc cho NavigationBar
                 .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp)) // Thêm hiệu ứng đổ bóng
         ) {
-            BottomNavigationBar()
+            BottomNavigationBar(navController)
         }
     }
 }
@@ -170,5 +173,5 @@ data class RewardItem(
 @Preview(showBackground = true)
 @Composable
 fun RewardsScreenPreview() {
-    RewardsScreen()
+    RewardsScreen(rememberNavController())
 }
