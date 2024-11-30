@@ -74,6 +74,9 @@ fun NavGraph(navController: NavHostController) {
                 onCheckout = {
                     cartItems.forEach() {
                         orderViewModel.createOrder(it, currentProfile)
+                        val coffee = coffeeViewModel.coffeeList.find { coffee -> coffee.id == it.coffeeId }!!
+                        val rewardPoint = coffee.rewardPoint.times((it.totalAmount / (coffee.price)).toInt())
+                        profileViewModel.addPoints(rewardPoint)
                     }
                     cartViewModel.clearCart()
                     for (order in orderViewModel.orders) {

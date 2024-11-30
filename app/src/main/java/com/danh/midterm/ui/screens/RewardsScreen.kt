@@ -110,15 +110,15 @@ fun RewardsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
             HistoryRewards(
                 // Truyền vào danh sách lịch sử giao dịch
                 historyRewards = orders.map {
                     val coffee = coffeeViewModel.findCoffeeById(it.coffeeId)
+                    val rewardPoint = coffee.rewardPoint.times((it.totalAmount / (coffee.price)).toInt())
                     RewardItem(
                         name = it.name,
                         date = it.date,
-                        points = coffee.rewardPoint.times((it.totalAmount / (coffee.price)).toInt())
+                        points = rewardPoint
                     )
                 },
                 modifier = Modifier.weight(1f)
