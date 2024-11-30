@@ -46,6 +46,7 @@ fun NavGraph(navController: NavHostController) {
             HomeScreen(
                 navController = navController,
                 coffeeViewModel = coffeeViewModel,
+                profileViewModel = profileViewModel,
                 onCoffeeSelected = { coffeeId ->
                     navController.navigate(CoffeeDetail.route + "/$coffeeId")
                 },
@@ -79,6 +80,7 @@ fun NavGraph(navController: NavHostController) {
                         val rewardPoint =
                             coffee.rewardPoint.times((it.totalAmount / (coffee.price)).toInt())
                         profileViewModel.addPoints(rewardPoint)
+                        profileViewModel.addStamps(it.quantity)
                     }
                     cartViewModel.clearCart()
                     for (order in orderViewModel.orders) {

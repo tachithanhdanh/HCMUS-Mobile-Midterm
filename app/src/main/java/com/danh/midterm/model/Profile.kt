@@ -5,5 +5,6 @@ data class Profile(
     var phoneNumber: String,
     var email: String,
     var address: String,
-    var points: Int = 0
+    var points: Int = 0,
+    var stamps: Int = 0
 )

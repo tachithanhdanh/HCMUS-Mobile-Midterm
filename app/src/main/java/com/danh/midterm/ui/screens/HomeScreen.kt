@@ -26,16 +26,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
+import com.danh.midterm.model.ModelConstants
 import com.danh.midterm.ui.components.CoffeeOrderingUI
 import com.danh.midterm.ui.components.LoyaltyCard
 import com.danh.midterm.ui.theme.TextColor
 import com.danh.midterm.viewmodel.CoffeeViewModel
+import com.danh.midterm.viewmodel.ProfileViewModel
 
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     coffeeViewModel: CoffeeViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
     onCoffeeSelected: (Int) -> Unit,
     onCartClick: () -> Unit,
     onProfileClick: () -> Unit,
@@ -43,6 +46,7 @@ fun HomeScreen(
 ) {
     // Thu thập dữ liệu từ StateFlow
     val coffeeList = coffeeViewModel.coffeeList
+    val profile = profileViewModel.profile
 
     // Entire Home Screen is wrapped in a Scaffold
     Scaffold(
@@ -103,8 +107,8 @@ fun HomeScreen(
 
                     // Loyalty Card Section
                     LoyaltyCard(
-                        currentStamps = 4,
-                        maxStamps = 8
+                        currentStamps = profile.stamps,
+                        maxStamps = ModelConstants.MAX_STAMPS,
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))

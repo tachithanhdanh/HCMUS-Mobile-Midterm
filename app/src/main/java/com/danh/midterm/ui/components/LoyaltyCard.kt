@@ -1,5 +1,6 @@
 package com.danh.midterm.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -16,7 +17,8 @@ import com.danh.midterm.ui.theme.DarkBlue
 @Composable
 fun LoyaltyCard(
     currentStamps: Int,
-    maxStamps: Int
+    maxStamps: Int,
+    onClick: () -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -24,6 +26,7 @@ fun LoyaltyCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(140.dp)
+            .clickable { onClick() }
     ) {
         Column (
             modifier = Modifier

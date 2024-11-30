@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.danh.midterm.mock.MockData
+import com.danh.midterm.model.ModelConstants
 import com.danh.midterm.model.Profile
 
 class ProfileViewModel: ViewModel() {
@@ -54,14 +55,27 @@ class ProfileViewModel: ViewModel() {
     }
 
     fun updateProfilePoints(points: Int) {
-        profile.points = points
+        profile = profile.copy(points = points)
     }
 
     fun addPoints(points: Int) {
-        profile.points += points
+        profile = profile.copy(points = profile.points + points)
     }
 
     fun redeemPoints(points: Int) {
-        profile.points -= points
+        profile = profile.copy(points = profile.points - points)
+    }
+
+    fun addStamps(stamps: Int) {
+        val newStamps = if (profile.stamps + stamps >= ModelConstants.MAX_STAMPS) {
+            ModelConstants.MAX_STAMPS
+        } else {
+            profile.stamps + stamps
+        }
+        profile = profile.copy(stamps = newStamps)
+    }
+
+    fun setStamps(stamps: Int) {
+        profile = profile.copy(stamps = stamps)
     }
 }
