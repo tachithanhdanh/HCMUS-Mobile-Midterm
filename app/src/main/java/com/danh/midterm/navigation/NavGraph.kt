@@ -24,7 +24,7 @@ import com.danh.midterm.viewmodel.CartViewModel
 import com.danh.midterm.viewmodel.CoffeeViewModel
 import com.danh.midterm.viewmodel.OrderViewModel
 import com.danh.midterm.viewmodel.ProfileViewModel
-import com.example.ordercoffee.ui.screens.HomeScreen
+import com.danh.midterm.ui.screens.HomeScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -74,8 +74,10 @@ fun NavGraph(navController: NavHostController) {
                 onCheckout = {
                     cartItems.forEach() {
                         orderViewModel.createOrder(it, currentProfile)
-                        val coffee = coffeeViewModel.coffeeList.find { coffee -> coffee.id == it.coffeeId }!!
-                        val rewardPoint = coffee.rewardPoint.times((it.totalAmount / (coffee.price)).toInt())
+                        val coffee =
+                            coffeeViewModel.coffeeList.find { coffee -> coffee.id == it.coffeeId }!!
+                        val rewardPoint =
+                            coffee.rewardPoint.times((it.totalAmount / (coffee.price)).toInt())
                         profileViewModel.addPoints(rewardPoint)
                     }
                     cartViewModel.clearCart()
@@ -112,7 +114,7 @@ fun NavGraph(navController: NavHostController) {
                 onRedeemReward = {
                     if (currentProfile.points >= it.redeemPoint) {
                         profileViewModel.updateProfile(currentProfile.copy(points = currentProfile.points - it.redeemPoint))
-                        navController.navigate(Screen.CoffeeDetail.route + "/${it.coffeeId}?isRedeem=true")
+                        navController.navigate(CoffeeDetail.route + "/${it.coffeeId}?isRedeem=true")
                     }
                 })
         }

@@ -49,7 +49,6 @@ fun RewardsScreen(
     orderViewModel: OrderViewModel = viewModel(),
     coffeeViewModel: CoffeeViewModel = viewModel(),
     onRedeemClick: () -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     val profile = profileViewModel.profile
     val orders = orderViewModel.orders

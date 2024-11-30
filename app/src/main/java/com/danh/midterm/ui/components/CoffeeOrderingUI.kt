@@ -33,7 +33,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.mock.MockData
 import com.danh.midterm.model.Coffee
-import com.danh.midterm.navigation.Screen
 import com.danh.midterm.ui.theme.CoffeeItemCardColor
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.Gray

@@ -1,4 +1,4 @@
-package com.example.ordercoffee.ui.screens
+package com.danh.midterm.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,10 +65,10 @@ fun CoffeeDetailScreen(
 ) {
     val coffee = coffeeViewModel.findCoffeeById(coffeeId)
     var selectedShot by remember { mutableStateOf("single") }
-    var quantity by remember { mutableStateOf(1) }
+    var quantity by remember { mutableIntStateOf(1) }
     var selectedType by remember { mutableStateOf("hot") }
-    var selectedSize by remember { mutableStateOf(1) }
-    var selectedIce by remember { mutableStateOf(1) }
+    var selectedSize by remember { mutableIntStateOf(1) }
+    var selectedIce by remember { mutableIntStateOf(1) }
     val icePrice = 0.5
     val sizePrice = 0.5
     val shotPrice = 0.5
