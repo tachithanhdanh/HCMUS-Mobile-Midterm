@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 
 data class CartItem(
     val id: Int,
+    val coffeeId: Int,
     @DrawableRes val image: Int,
     val name: String,
     val shot: String,

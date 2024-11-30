@@ -17,7 +17,8 @@ import com.danh.midterm.ui.theme.DarkBlueLight
 
 @Composable
 fun PointCard(
-    currentPoint: Int
+    currentPoint: Int,
+    onClick: () -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -56,7 +57,7 @@ fun PointCard(
             }
             Column {
                 Button(
-                    onClick = { },
+                    onClick = { onClick() },
                     modifier = Modifier,
 //                        .padding(4.dp)
 //                        .width(120.dp), // Adjust the size if necessary

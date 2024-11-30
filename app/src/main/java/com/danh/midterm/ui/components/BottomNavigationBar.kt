@@ -26,12 +26,13 @@ import java.util.logging.Logger
 @Composable
 fun BottomNavigationBar(
     navController: NavHostController,
+    modifier: Modifier = Modifier
 ) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 4.dp,
-        modifier = Modifier.clip(RoundedCornerShape(16.dp)) // Bo góc cho NavigationBar
+        modifier = modifier.clip(RoundedCornerShape(16.dp)) // Bo góc cho NavigationBar
     ) {
         NavigationBarItem(
             selected = true,

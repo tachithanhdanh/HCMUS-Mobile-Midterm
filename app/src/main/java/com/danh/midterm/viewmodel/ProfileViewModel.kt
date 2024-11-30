@@ -48,4 +48,20 @@ class ProfileViewModel: ViewModel() {
     fun updateProfileEmail(email: String) {
         profile.email = email
     }
+
+    fun getProfilePoints(): Int {
+        return profile.points
+    }
+
+    fun updateProfilePoints(points: Int) {
+        profile.points = points
+    }
+
+    fun addPoints(points: Int) {
+        profile.points += points
+    }
+
+    fun redeemPoints(points: Int) {
+        profile.points -= points
+    }
 }

@@ -26,7 +26,7 @@ val LightTextColor = TextColor.copy(alpha = 0.5f)
 
 val DividerColor = Color(0xFFF4F5F7)
 
-val DarkBlueLight = Color(0xFFA2CDE9).copy(alpha = 0.3f)
+val DarkBlueLight = Color(0xFFA2CDE9).copy(alpha = 0.75f)
 
 val LogoTextColor = Color(0xFFFFFAF6)
 

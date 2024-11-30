@@ -35,14 +35,14 @@ import com.danh.midterm.viewmodel.CoffeeViewModel
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    homeViewModel: CoffeeViewModel = viewModel(),
+    coffeeViewModel: CoffeeViewModel = viewModel(),
     onCoffeeSelected: (Int) -> Unit,
     onCartClick: () -> Unit,
     onProfileClick: () -> Unit,
     fullName: String = "Danh",
 ) {
     // Thu thập dữ liệu từ StateFlow
-    val coffeeList = homeViewModel.coffeeList
+    val coffeeList = coffeeViewModel.coffeeList
 
     // Entire Home Screen is wrapped in a Scaffold
     Scaffold(

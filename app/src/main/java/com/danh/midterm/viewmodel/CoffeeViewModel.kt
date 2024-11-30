@@ -12,7 +12,7 @@ class CoffeeViewModel : ViewModel() {
         private set
 
     fun findCoffeeById(id: Int): Coffee {
-        return MockData.coffeeList.find { it.id == id } ?: MockData.coffeeList[0]
+        return coffeeList.find { it.id == id } ?: MockData.coffeeList[0]
     }
 
     fun addCoffee(coffee: Coffee) {

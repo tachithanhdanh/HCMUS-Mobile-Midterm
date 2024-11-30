@@ -8,7 +8,9 @@ import com.danh.midterm.mock.MockData
 import com.danh.midterm.model.CartItem
 import com.danh.midterm.model.Order
 import com.danh.midterm.model.Profile
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class OrderViewModel: ViewModel() {
     // Hold the order list
@@ -33,10 +35,11 @@ class OrderViewModel: ViewModel() {
     fun createOrder(cartItem: CartItem, profile: Profile) {
         val order = Order(
             date = Date(),
+            coffeeId = cartItem.coffeeId,
             totalAmount = cartItem.totalAmount,
-            name = profile.name,
+            name = cartItem.name,
             address = profile.address,
-            complete = false
+            complete = mutableStateOf(false)
         )
         addOrder(order)
     }

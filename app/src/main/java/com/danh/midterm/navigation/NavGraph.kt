@@ -3,17 +3,12 @@ package com.danh.midterm.navigation
 
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.danh.midterm.R
 import com.danh.midterm.mock.MockData
-import com.danh.midterm.model.Order
 import com.danh.midterm.navigation.Screen.CoffeeDetail
 import com.danh.midterm.navigation.Screen.Home
 import com.danh.midterm.navigation.Screen.Splash
@@ -26,6 +21,7 @@ import com.danh.midterm.ui.screens.RedeemRewardsScreen
 import com.danh.midterm.ui.screens.RewardsScreen
 import com.danh.midterm.ui.screens.SplashScreen
 import com.danh.midterm.viewmodel.CartViewModel
+import com.danh.midterm.viewmodel.CoffeeViewModel
 import com.danh.midterm.viewmodel.OrderViewModel
 import com.danh.midterm.viewmodel.ProfileViewModel
 import com.example.ordercoffee.ui.screens.HomeScreen
@@ -37,6 +33,7 @@ fun NavGraph(navController: NavHostController) {
     val orderViewModel: OrderViewModel = viewModel()
     val profileViewModel: ProfileViewModel = viewModel()
     val currentProfile = profileViewModel.profile
+    val coffeeViewModel: CoffeeViewModel = viewModel()
     NavHost(navController = navController, startDestination = Splash.route) {
         composable(Splash.route) {
             SplashScreen(
@@ -48,6 +45,7 @@ fun NavGraph(navController: NavHostController) {
         composable(Home.route) {
             HomeScreen(
                 navController = navController,
+                coffeeViewModel = coffeeViewModel,
                 onCoffeeSelected = { coffeeId ->
                     navController.navigate(CoffeeDetail.route + "/$coffeeId")
                 },
@@ -56,12 +54,17 @@ fun NavGraph(navController: NavHostController) {
                 fullName = currentProfile.name
             )
         }
-        composable(CoffeeDetail.route + "/{coffeeId}") { backStackEntry ->
+        composable(CoffeeDetail.route + "/{coffeeId}?isRedeem={isRedeem}") { backStackEntry ->
             val coffeeId = backStackEntry.arguments?.getString("coffeeId")?.toIntOrNull() ?: 1
+            val isRedeem = backStackEntry.arguments?.getString("isRedeem").equals("true")
+            Log.d("CoffeeDetail", backStackEntry.arguments.toString())
+            Log.d("CoffeeDetail", "isRedeem: $isRedeem")
             CoffeeDetailScreen(
                 navController = navController, coffeeId = coffeeId,
+                coffeeViewModel = coffeeViewModel,
                 onAddToCart = { cartViewModel.addItem(it); navController.navigate(Screen.CoffeeCart.route) },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                isRedeem = isRedeem
             )
         }
         composable(Screen.CoffeeCart.route) {
@@ -77,7 +80,7 @@ fun NavGraph(navController: NavHostController) {
                         Log.d("Order", order.toString())
                     }
                     navController.navigate(Screen.OrderSuccess.route)
-                             },
+                },
                 onBack = { navController.popBackStack() },
                 onDelete = { id ->
                     cartViewModel.removeItemById(id)
@@ -90,13 +93,32 @@ fun NavGraph(navController: NavHostController) {
             ProfileScreen(navController = navController)
         }
         composable(Screen.Rewards.route) {
-            RewardsScreen(navController = navController)
+            RewardsScreen(
+                navController = navController,
+                coffeeViewModel = coffeeViewModel,
+                profileViewModel = profileViewModel,
+                orderViewModel = orderViewModel,
+                onRedeemClick = { navController.navigate(Screen.RedeemRewards.route) }
+            )
         }
-//        composable(Screen.RedeemRewards.route) {
-//            RedeemRewardsScreen(navController = navController, rewards = MockData.CoffeeRedeemList)
-//        }
+        composable(Screen.RedeemRewards.route) {
+            RedeemRewardsScreen(
+                navController = navController,
+                coffeeViewModel = coffeeViewModel,
+                coffeeRedeemList = MockData.coffeeRedeemList,
+                onRedeemReward = {
+                    if (currentProfile.points >= it.redeemPoint) {
+                        profileViewModel.updateProfile(currentProfile.copy(points = currentProfile.points - it.redeemPoint))
+                        navController.navigate(Screen.CoffeeDetail.route + "/${it.coffeeId}?isRedeem=true")
+                    }
+                })
+        }
         composable(Screen.MyOrders.route) {
-            MyOrdersScreen(navController = navController, orderViewModel = orderViewModel)
+            MyOrdersScreen(
+                navController = navController,
+                orderViewModel = orderViewModel,
+                coffeeViewModel = coffeeViewModel
+            )
         }
     }
 }

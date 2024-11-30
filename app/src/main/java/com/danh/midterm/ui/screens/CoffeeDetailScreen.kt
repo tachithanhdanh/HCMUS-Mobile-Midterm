@@ -59,7 +59,8 @@ fun CoffeeDetailScreen(
     cartViewModel: CartViewModel = viewModel(),
     coffeeId: Int,
     onAddToCart: (CartItem) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    isRedeem: Boolean = false
 ) {
     val coffee = coffeeViewModel.findCoffeeById(coffeeId)
     var selectedShot by remember { mutableStateOf("single") }
@@ -71,7 +72,8 @@ fun CoffeeDetailScreen(
     val sizePrice = 0.5
     val shotPrice = 0.5
     val totalAmount =
-        quantity * (coffee.price + icePrice * selectedIce + shotPrice * (if (selectedShot == "double") 1 else 0) + sizePrice * (selectedSize - 1))
+        if (isRedeem) 0.0
+        else quantity * (coffee.price + icePrice * selectedIce + shotPrice * (if (selectedShot == "double") 1 else 0) + sizePrice * (selectedSize - 1))
 
     fun getSize(): String {
         return when (selectedSize) {
@@ -172,15 +174,17 @@ fun CoffeeDetailScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp) // Thêm padding bên trong viền
                         .clip(RoundedCornerShape(40.dp)) // Đảm bảo viền và góc bo khớp nhau
                 ) {
-                    IconButton(
-                        onClick = { quantity = if (quantity > 1) quantity - 1 else 1 },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_minus),
-                            contentDescription = "Decrease",
-                            tint = Color.Unspecified // Loại bỏ màu mặc định
-                        )
+                    if (!isRedeem) {
+                        IconButton(
+                            onClick = { quantity = if (quantity > 1) quantity - 1 else 1 },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_minus),
+                                contentDescription = "Decrease",
+                                tint = Color.Unspecified // Loại bỏ màu mặc định
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -189,18 +193,21 @@ fun CoffeeDetailScreen(
                         color = TextColor
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    IconButton(
-                        onClick = {
-                            quantity = if (quantity < 20) quantity + 1 else 20
-                        },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_plus),
-                            contentDescription = "Increase",
-                            tint = Color.Unspecified // Loại bỏ màu mặc định
-                        )
+                    if (!isRedeem) {
+                        IconButton(
+                            onClick = {
+                                quantity = if (quantity < 20) quantity + 1 else 20
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_plus),
+                                contentDescription = "Increase",
+                                tint = Color.Unspecified // Loại bỏ màu mặc định
+                            )
+                        }
                     }
+
                 }
             }
 
@@ -474,6 +481,7 @@ fun CoffeeDetailScreen(
                     onAddToCart(
                         CartItem(
                             id = cartViewModel.getNewId(),
+                            coffeeId = coffee.id,
                             image = coffee.imageResource,
                             name = coffee.name,
                             shot = selectedShot,

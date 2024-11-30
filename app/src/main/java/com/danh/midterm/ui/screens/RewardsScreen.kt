@@ -1,5 +1,7 @@
 package com.danh.midterm.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,87 +14,122 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.danh.midterm.navigation.Screen
+import com.danh.midterm.model.RewardItem
 import com.danh.midterm.ui.components.LoyaltyCard
 import com.danh.midterm.ui.components.PointCard
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.DarkBlueLight
 import com.danh.midterm.ui.theme.DividerColor
+import com.danh.midterm.viewmodel.CoffeeViewModel
+import com.danh.midterm.viewmodel.OrderViewModel
+import com.danh.midterm.viewmodel.ProfileViewModel
 import com.example.ordercoffee.ui.components.BottomNavigationBar
 
 @Composable
 fun RewardsScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    profileViewModel: ProfileViewModel = viewModel(),
+    orderViewModel: OrderViewModel = viewModel(),
+    coffeeViewModel: CoffeeViewModel = viewModel(),
+    onRedeemClick: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 48.dp)
+    val profile = profileViewModel.profile
+    val orders = orderViewModel.orders
+    val coffeeList = coffeeViewModel.coffeeList
+    Scaffold(
+        topBar = {
+            Column(
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .padding(top = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Rewards",
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.W500,
+                        color = DarkBlue,
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier.padding(24.dp)
+                )
+            }
+
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                    .clip(RoundedCornerShape(16.dp)) // Bo góc cho NavigationBar
+                    .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp)) // Thêm hiệu ứng đổ bóng
+            ) {
+                BottomNavigationBar(navController)
+            }
+        },
+        containerColor = Color.Transparent
     ) {
-        LoyaltyCard(
-            currentStamps = 4,
-            maxStamps = 8
-        )
+        padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 24.dp)
+        ) {
+            LoyaltyCard(
+                currentStamps = 4,
+                maxStamps = 8
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        PointCard(
-            currentPoint = 2750
-        )
+            PointCard(
+                currentPoint = profile.points,
+                onClick = onRedeemClick
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
 
-        HistoryRewards(
-            // Truyền vào danh sách lịch sử giao dịch
-            historyRewards = listOf(
-                RewardItem(
-                    name = "Americano",
-                    date = "24 June | 12:30 PM",
-                    points = 12
-                ),
-                RewardItem(
-                    name = "Cafe Latte",
-                    date = "22 June | 08:30 AM",
-                    points = 12
-                ),
-                RewardItem(
-                    name = "Green Tea Latte",
-                    date = "16 June | 10:48 AM",
-                    points = 12
-                ),
-                RewardItem(
-                    name = "Flat White",
-                    date = "12 May | 11:25 AM",
-                    points = 12
-                ),
-            ),
-            modifier = Modifier.weight(1f)
-        )
+            HistoryRewards(
+                // Truyền vào danh sách lịch sử giao dịch
+                historyRewards = orders.map {
+                    val coffee = coffeeViewModel.findCoffeeById(it.coffeeId)
+                    RewardItem(
+                        name = it.name,
+                        date = it.date,
+                        points = coffee.rewardPoint.times((it.totalAmount / (coffee.price)).toInt())
+                    )
+                },
+                modifier = Modifier.weight(1f)
+            )
 //
 //        Spacer(modifier = Modifier.height(16.dp))
 //
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp)) // Bo góc cho NavigationBar
-                .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp)) // Thêm hiệu ứng đổ bóng
-        ) {
-            BottomNavigationBar(navController)
+
         }
     }
+
 }
 
 @Composable
@@ -113,7 +150,7 @@ fun HistoryRewards(historyRewards: List<RewardItem>, modifier: Modifier = Modifi
 
         LazyColumn {
             items(historyRewards) { reward ->
-                RewardItem(reward)
+                RedeemItem(reward)
                 HorizontalDivider(
                     thickness = 2.dp,
                     color = DividerColor, // Màu nhạt
@@ -125,7 +162,7 @@ fun HistoryRewards(historyRewards: List<RewardItem>, modifier: Modifier = Modifi
 }
 
 @Composable
-fun RewardItem(reward: RewardItem) {
+fun RedeemItem(reward: RewardItem) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +182,7 @@ fun RewardItem(reward: RewardItem) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = reward.date,
+                text = reward.getFormattedDate(),
                 style = TextStyle(
                     color = DarkBlueLight,
                     fontWeight = FontWeight.W500,
@@ -163,12 +200,6 @@ fun RewardItem(reward: RewardItem) {
         )
     }
 }
-
-data class RewardItem(
-    val name: String,
-    val date: String,
-    val points: Int
-)
 
 @Preview(showBackground = true)
 @Composable
