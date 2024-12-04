@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +46,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.danh.midterm.R
 import com.danh.midterm.model.CartItem
+import com.danh.midterm.ui.components.CoffeeDetailDialog
 import com.danh.midterm.ui.theme.CoffeeItemCardColor
 import com.danh.midterm.ui.theme.DarkBlue
 import com.danh.midterm.ui.theme.DividerColor
@@ -61,6 +63,7 @@ fun CoffeeDetailScreen(
     coffeeId: Int,
     onAddToCart: (CartItem) -> Unit,
     onBack: () -> Unit,
+    onCartClick: () -> Unit,
     isRedeem: Boolean = false
 ) {
     val coffee = coffeeViewModel.findCoffeeById(coffeeId)
@@ -76,6 +79,9 @@ fun CoffeeDetailScreen(
         if (isRedeem) 0.0
         else quantity * (coffee.price + icePrice * selectedIce + shotPrice * (if (selectedShot == "double") 1 else 0) + sizePrice * (selectedSize - 1))
 
+    // Biến trạng thái để theo dõi việc mở modal
+    var showDialog by remember { mutableStateOf(false) }
+
     fun getSize(): String {
         return when (selectedSize) {
             1 -> "small"
@@ -90,6 +96,11 @@ fun CoffeeDetailScreen(
             2 -> "half ice"
             else -> "full ice"
         }
+    }
+
+    // Hiển thị modal khi showDialog là true
+    if (showDialog) {
+        CoffeeDetailDialog(coffee = coffee, onDismiss = { showDialog = false })
     }
 
     Scaffold(
@@ -121,7 +132,7 @@ fun CoffeeDetailScreen(
                     style = MaterialTheme.typography.headlineSmall,
                     color = TextColor
                 )
-                IconButton(onClick = { /* Handle cart click */ }) {
+                IconButton(onClick = { onCartClick() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_cart),
                         contentDescription = "Cart",
@@ -139,7 +150,10 @@ fun CoffeeDetailScreen(
                     ) // Add shadow for elevation
                     .background(color = CoffeeItemCardColor)
                     .clip(RoundedCornerShape(12.dp))
-                    .height(200.dp),
+                    .height(200.dp)
+                    .clickable {
+                        showDialog = true
+                    },
             ) {
                 Image(
                     painter = painterResource(id = coffee.imageResource),
@@ -515,6 +529,7 @@ fun CoffeeDetailScreenPreview() {
         navController = navController,
         coffeeId = 1,
         onAddToCart = {},
-        onBack = {}
+        onBack = {},
+        onCartClick = {}
     )
 }

@@ -12,10 +12,38 @@ import java.util.Date
 
 object MockData {
     val coffeeList = listOf(
-        Coffee(1, "Americano", 3.5, R.drawable.img_americano, 15),
-        Coffee(2, "Cappuccino", 4.0, R.drawable.img_cappuccino, 6),
-        Coffee(3, "Mocha", 3.0, R.drawable.img_mocha, 18),
-        Coffee(4, "Flat White", 5.0, R.drawable.img_flat_white, 24)
+        Coffee(
+            id = 1,
+            name = "Americano",
+            price = 3.5,
+            imageResource = R.drawable.img_americano,
+            rewardPoint = 15,
+            description = "A classic espresso-based drink with hot water, creating a smooth, rich flavor."
+        ),
+        Coffee(
+            id = 2,
+            name = "Cappuccino",
+            price = 4.0,
+            imageResource = R.drawable.img_cappuccino,
+            rewardPoint = 6,
+            description = "Espresso topped with steamed milk and a layer of foamy milk, creating a creamy texture."
+        ),
+        Coffee(
+            id = 3,
+            name = "Mocha",
+            price = 3.0,
+            imageResource = R.drawable.img_mocha,
+            rewardPoint = 18,
+            description = "A sweet combination of espresso, steamed milk, and chocolate syrup, topped with whipped cream."
+        ),
+        Coffee(
+            id = 4,
+            name = "Flat White",
+            price = 5.0,
+            imageResource = R.drawable.img_flat_white,
+            rewardPoint = 24,
+            description = "A smooth, velvety coffee made with a double shot of espresso and steamed milk."
+        )
     )
 
     val coffeeRedeemList = listOf(
@@ -115,7 +143,8 @@ object MockData {
         points = orders.sumOf { order ->
             // Tìm coffee tương ứng với order
             val coffee = coffeeList.find { it.id == order.coffeeId }
-            val coffeePoint = (coffee?.rewardPoint?.times((order.totalAmount / (coffee.price)).toInt())) ?: 0
+            val coffeePoint =
+                (coffee?.rewardPoint?.times((order.totalAmount / (coffee.price)).toInt())) ?: 0
             return@sumOf coffeePoint
         }
     )
